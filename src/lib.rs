@@ -21,7 +21,7 @@ impl FromStr for Dir {
             "E" => Ok(Dir::E),
             "W" => Ok(Dir::W),
             "S" => Ok(Dir::S),
-            other => Err(format!("Cannot parse direction '{}' - only N,E,W,S are valid values", s))
+            other => Err(format!("Cannot parse direction '{}' - only N,E,W,S are valid values", other))
         }
     }
 }
@@ -240,7 +240,7 @@ impl MapState{
     }
 
     fn print(&self) {
-        let mut stdout = std::io::stdout();
+        let  stdout = std::io::stdout();
         let mut lock = stdout.lock();
 
         for y in 0..self.walls.height() {
@@ -258,12 +258,12 @@ impl MapState{
                     }
                 };
 
-                write!(lock, "{}", c);
+                write!(lock, "{}", c).unwrap();
 
             }
-            write!(lock, "\n");
+            write!(lock, "\n").unwrap();
         }
-        writeln!(lock, "State: {}  Nearby: {}  Remaining: {}\n", self.bot_state, self.nearby_walls(), self.unvisited());
+        writeln!(lock, "State: {}  Nearby: {}  Remaining: {}\n", self.bot_state, self.nearby_walls(), self.unvisited()).unwrap();
     }
 }
 
@@ -280,7 +280,7 @@ impl FromStr for SpaceCondition {
             "N" | "E" | "W" | "S" => Ok(SpaceCondition::Wall),
             "x" => Ok(SpaceCondition::Clear),
             "*" => Ok(SpaceCondition::Any),
-            other => Err(format!("Cannot parse '{}' - only N,E,W,S,x,* are valid values", s))
+            other => Err(format!("Cannot parse '{}' - only N,E,W,S,x,* are valid values", other))
         }
     }
 }
@@ -457,10 +457,13 @@ impl RuleSetTester {
     pub fn test_all(&mut self){
         let mut start_index = 0;
         loop {
-            let mut game_maybe = Game::create(self.map, start_index, self.rules.clone());
+            let game_maybe = Game::create(self.map, start_index, self.rules.clone());
 
             if let Some(mut game) = game_maybe {
                 assert_eq!(game.play_to_end(self.turn_limit), true);
+            }else{
+                assert!(start_index > 0);
+                return;
             }
             start_index += 1;
         }
